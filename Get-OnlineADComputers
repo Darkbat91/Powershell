@@ -1,0 +1,25 @@
+workflow Get-OnlineComputer
+{
+param
+([switch]$Onlineonly,
+[switch]$ExcludeServers,
+$Searchbase = "<Default OU of Computers>")
+
+
+[array]$Computers = Get-ADComputer -Filter * -SearchBase $Searchbase -Properties *
+
+if ($ExcludeServers)
+    {$Computers = $Computers | Where-Object -FilterScript {$_.operatingsystem -notlike "*Server*"}}
+
+foreach -parallel ($Computer in $Computers)
+    {
+    $Online = $false
+    if (Test-Connection -ComputerName $Computer.Name -Quiet -Count 1)
+        {$Online = $True}
+
+    $Computer | Add-Member -MemberType NoteProperty -Name Online -Value $Online -Force
+    }
+    if ($Onlineonly)
+    {return $Computers | Where-Object -filterscript {$_.online -eq $True}}
+    else {return $Computers}
+}
