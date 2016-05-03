@@ -1,45 +1,16 @@
-#Borrowed function
-Function Get-RedirectedUrl {
+Import-Module BitsTransfer
 
-    Param (
-        [Parameter(Mandatory=$true)]
-        [String]$URL
-    )
-
-    $request = [System.Net.WebRequest]::Create($url)
-    $request.AllowAutoRedirect=$false
-    $response=$request.GetResponse()
-
-    If ($response.StatusCode -eq "Found")
-    {
-        $response.GetResponseHeader("Location")
-    }
-}
+$DestinationDIR = #Desired Destination Directory
 
 $URLs = Invoke-WebRequest -Uri "https://www.java.com/en/download/manual.jsp" | select -expand links
-$Urls  | ForEach-Object {if ($_.innerHtml -like "Windows Offline") {$SourceUrl = $_.href}}
-$Destination = "C:\jreX86.exe"
-$date = Get-Date -Format ddMMMyyyy
-$emailTo = "email@company.com"
-$emailFrom = "Help Desk<help@company.com>"
-
-$FileName = [System.IO.Path]::GetFileName((Get-RedirectedUrl $SourceURL))
+$Urls  | ForEach-Object {if ($_.innerHtml -like "Windows Offline") {$Source86Url = $_.href}}
+$Urls  | ForEach-Object {if ($_.innerHtml -like "Windows Offline (64-bit)") {$Source64Url = $_.href}}
+$Destination86 = "$DestinationDIR\Javainstall86.exe"
+$Destination64 = "$DestinationDIR\Javainstall64.exe"
 
 
+#$FileName = [System.IO.Path]::GetFileName((Get-RedirectedUrl $SourceURL))
 
-if ($SourceURL -ne $null)
-{ Invoke-WebRequest -Uri $SourceURL -OutFile $Destination}
-else
-{
-$subject = "Java Auto Update Failed $Date"
-$message = "Java has changed their site and this script needs updated. It is located at <Script Location> Most likely line 19 will need updated with the new URL"
-$PickupDirectory = "\\emailserver\C$\Program Files\Microsoft\Exchange Server\V14\TransportRoles\Pickup"
-$Template = 
-"To: $emailTo
-From: $emailFrom
-Subject: $subject
 
-$message"
-
-Add-Content -Path $($PickupDirectory + "\email.eml") -Value $Template
-}
+#Invoke-WebRequest -Uri $SourceURL -OutFile $Destination
+Start-BitsTransfer -Source $Source86Url, $Source64Url -Destination $Destination86, $Destination64
