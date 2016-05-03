@@ -2,10 +2,11 @@
 Import-Module BitsTransfer
 
 $MSIURL = @()
+$adobeauthtoken=## NEED TO ADD AUTH TOKEN
 $DestinationPlugin = "##Destination##"
 $DestinationAX = "##Destination"
 
-$URLs = Invoke-WebRequest -Uri "https://www.adobe.com/products/flashplayer/distribution3.html" | select -expand links
+$URLs = Invoke-WebRequest -Uri "https://www.adobe.com/products/flashplayer/distribution4.html?auth=$Adobeauthtoken" | select -expand links
 $Urls  | ForEach-Object {if ($_.innerHtml -like "Download MSI*") {$MSIURL += $_.href}}
 
 $SourceAX = $MSIURL[0]
