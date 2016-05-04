@@ -1,0 +1,44 @@
+function Get-InstalledPrograms
+{
+param(
+[switch]$IncludeUpdates,
+[string]$DisplayNameFilter
+)
+# Registry Install paths
+$RegUninstallPaths = @( 
+    'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*', 
+    'HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*') 
+
+if($IncludeUpdates.IsPresent)
+{
+$UninstallSearchFilter = { 
+    (![string]::IsNullOrEmpty($_.uninstallstring)) -and
+    [string]::IsNullOrEmpty($_.ParentDisplayName)
+    }  
+}
+else
+{
+#Exclude anything that is not propertly configured or is an Update or Service pack
+$UninstallSearchFilter = { ($_.DisplayName -notlike "*update*") -and  
+    ($_.DisplayName -notlike "*service pack*") -and
+    ($_."(default)" -notlike "KB*") -and 
+    (![string]::IsNullOrEmpty($_.uninstallstring)) -and
+    [string]::IsNullOrEmpty($_.ParentDisplayName)
+    }  
+}
+#Initialize variable
+$installed = @()
+
+#For each of the paths find what we are looking for
+foreach ($Path in $RegUninstallPaths) { 
+    if (Test-Path $Path) { 
+        $Installed += Get-ItemProperty $Path | Where $UninstallSearchFilter | Select DisplayName,DisplayVersion, Publisher, InstallDate
+        }}
+
+if(![string]::IsNullOrEmpty($DisplayNameFilter))
+{
+$installed = $installed | where {$_.displayName -like $DisplayNameFilter}
+}
+# Return sorted by display Name
+return $installed | Sort DisplayName
+}
