@@ -1,0 +1,15 @@
+#Source: http://deployhappiness.com/rename-computers-powershell/
+
+$Computers = import-csv .\RenameComputers.csv
+ 
+foreach ($Computer in $Computers){
+ 
+  Rename-Computer -NewName $Computer.NewName -ComputerName $Computer.Name
+ 
+  if ($? -eq $True){
+ 
+    (get-content .\RenameComputers.csv) | Where-Object {$_ -notmatch $computer.name} | set-content .\RenameComputers.csv
+    }
+  }
+
+ 
