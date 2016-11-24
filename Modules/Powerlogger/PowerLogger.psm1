@@ -13,7 +13,7 @@
 CHANGELOG
 -----------------------------------------------------------------------------------------------------------------
     1.0 Initial Release
-	1.1 Addition of terminal logging with seperate log level
+	1.1 Addition of terminal logging with separate log level
     1.2 Added Ability to Remove previous log if exists
     1.4 Added Ability to set color of text outputting to console besides the Default
     1.5 Added Master override of colloring for terminal Output
